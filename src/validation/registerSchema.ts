@@ -8,3 +8,8 @@ export const registerSchema = vine.object({
     password_confirmation: vine.string().sameAs("password")
 });
 
+
+export const loginSchema = vine.object({
+    email: vine.string().email(),
+    password: vine.string()
+})

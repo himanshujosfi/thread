@@ -6,3 +6,10 @@ type authType = {
     username?: string,
     conformPassword?: string
 }
+
+type authErrorType = {
+    email?: string,
+    password?: string,
+    name?: string,
+    username?: string,
+}

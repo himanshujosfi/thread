@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 
 export const authOptions: AuthOptions = {
+
     providers: [
         CredentialsProvider({
             // The name to display on the sign in form (e.g. "Sign in with...")
@@ -17,10 +18,10 @@ export const authOptions: AuthOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
-                // Add logic here to look up the user from the credentials supplied
-                const user = { id: "1", name: "J Smith", email: "jsmith@example.com" }
+                const user = { id: "1", name: "J Smith", email: "jsmith@example.com", password: "1234" }
 
                 if (user) {
+
                     // Any object returned will be saved in `user` property of the JWT
                     return user
                 } else {
