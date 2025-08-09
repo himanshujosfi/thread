@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import bcrypt from 'bcryptjs'
 import { useRouter } from 'next/navigation'
 
 const Login = () => {
@@ -21,8 +20,7 @@ const Login = () => {
         if (!email || !password) {
             return alert("please fill all fields")
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const payload = { email, password: hashedPassword };
+        const payload = { email, password };
         setLoader(true)
         try {
             const res = await fetch("/api/auth/login", {

@@ -4,34 +4,42 @@ import vine, { errors } from "@vinejs/vine";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
+
+
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json()
-        const validator = vine.compile(registerSchema)
-        const output = await validator.validate(body)
+        const body = await req.json();
+        const validator = vine.compile(registerSchema);
+        const output = await validator.validate(body);
+
+        output.email = output.email.toLowerCase();
 
         output.password = await bcrypt.hash(output.password, 10);
-        output.password_confirmation = await bcrypt.hash(output.password_confirmation, 10);
 
+        delete (output as any).password_confirmation;
 
-        // check the user already exists
-        const existingUser = await prisma.user.findUnique({ where: { email: output.email } })
+        const existingUser = await prisma.user.findUnique({
+            where: { email: output.email }
+        });
+
         if (existingUser) {
-            return NextResponse.json({
-                status: 400, error: "User already exist"
-            },
-            )
+            return NextResponse.json(
+                { error: "User already exists" },
+                { status: 400 }
+            );
         }
-        // inset in db
+
+
         await prisma.user.create({
             data: {
                 name: output.name,
                 email: output.email,
+                password: output.password
             }
-        })
+        });
 
         return NextResponse.json(
-            { messages: "User Account Created Sucessfully ", },
+            { message: "User account created successfully" },
             { status: 200 }
         );
 
@@ -44,7 +52,6 @@ export async function POST(req: NextRequest) {
             );
         }
         console.error("Unexpected Error:", error);
-        return NextResponse.json({ messages: "Unexpected error" }, { status: 500 });
+        return NextResponse.json({ message: "Unexpected error" }, { status: 500 });
     }
-
 }

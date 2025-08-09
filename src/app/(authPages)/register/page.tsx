@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useRouter } from 'next/navigation'
-import bcrypt from 'bcryptjs'
 
 const Register = () => {
     const router = useRouter()
@@ -18,7 +17,6 @@ const Register = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const hashPassword = bcrypt.hashSync(authRegister?.password ?? "", 10);
         try {
             const res = await fetch("/api/auth/register", {
                 method: "POST",
@@ -26,8 +24,8 @@ const Register = () => {
                 body: JSON.stringify({
                     name: authRegister.name,
                     email: authRegister.email,
-                    password: hashPassword,
-                    password_confirmation: hashPassword
+                    password: authRegister.password,
+                    password_confirmation: authRegister.conformPassword
                 })
             });
             if (res.ok) {
