@@ -1,14 +1,20 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-// import { useRouter } from 'next/navigation'
-import { signIn } from "next-auth/react"
+import { useRouter } from 'next/navigation'
+import { signIn, useSession } from "next-auth/react"
 
-const Login = () => {
-    // const router = useRouter()
+const Login = async () => {
+    const router = useRouter()
+    const session = useSession()
+    useEffect(() => {
+        if (session) {
+            router.push("/")
+        }
+    })
     const [loader, setLoader] = useState<boolean>(false)
     const [authRegister, setAuthRegister] = useState<authType>({
         email: "",

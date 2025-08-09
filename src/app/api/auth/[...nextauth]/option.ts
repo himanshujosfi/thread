@@ -14,8 +14,6 @@ export type customeUser = {
     id: string | null,
     name: string | null,
     email: string | null,
-    image: string | null,
-    password: string | null
 }
 
 export const authOptions: AuthOptions = {
@@ -27,14 +25,10 @@ export const authOptions: AuthOptions = {
             // Persist the OAuth access_token and or the user id to the token right after signin
             if (user) {
                 token.user = user
-                token.id = user.id
-
-                // token.id = profile.id
             }
             return token
         },
         async session({ session, token, user }: { session: customeSession, token: JWT, user: User }) {
-
             session.user = token.user as customeUser
             return session
         }
@@ -57,7 +51,6 @@ export const authOptions: AuthOptions = {
                         name: true,
                         email: true,
                         // image?: true,
-                        password: true
                     }
                 })
 
