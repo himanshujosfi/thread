@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         // Compare password
         const isPasswordValid = await bcrypt.compare(
             output.password,
-            existingUser.password
+            existingUser.password!
         );
 
 
