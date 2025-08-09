@@ -4,10 +4,11 @@ import React, { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
+import { signIn } from "next-auth/react"
 
 const Login = () => {
-    const router = useRouter()
+    // const router = useRouter()
     const [loader, setLoader] = useState<boolean>(false)
     const [authRegister, setAuthRegister] = useState<authType>({
         email: "",
@@ -34,7 +35,13 @@ const Login = () => {
             const data = await res.json();
             if (res.ok) {
                 setLoader(false)
-                router.push("/Dashboard")
+                signIn("credentials", {
+                    email: authRegister.email,
+                    password: authRegister.password,
+                    redirect: true,
+                    callbackUrl: "/"
+                })
+                // router.push("/Dashboard")
             }
         } catch (error) {
             setLoader(false)

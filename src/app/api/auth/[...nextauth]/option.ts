@@ -1,34 +1,71 @@
-import NextAuth from "next-auth"
+import prisma from "@/Db/db.config";
+import { User } from "@/generated/prisma";
+import NextAuth, { ISODateString } from "next-auth"
 import { AuthOptions } from "next-auth"
+import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+export type customeSession = {
+    user: customeUser,
+    expires: ISODateString
+}
+
+export type customeUser = {
+    id: string | null,
+    name: string | null,
+    email: string | null,
+    image: string | null,
+    password: string | null
+}
 
 export const authOptions: AuthOptions = {
+    pages: {
+        signIn: "/auth/logIn"
+    },
+    callbacks: {
+        async jwt({ token, user }) {
+            // Persist the OAuth access_token and or the user id to the token right after signin
+            if (user) {
+                token.user = user
+                token.id = user.id
+
+                // token.id = profile.id
+            }
+            return token
+        },
+        async session({ session, token, user }: { session: customeSession, token: JWT, user: User }) {
+
+            session.user = token.user as customeUser
+            return session
+        }
+    },
 
     providers: [
         CredentialsProvider({
-            // The name to display on the sign in form (e.g. "Sign in with...")
             name: "Credentials",
-            // `credentials` is used to generate a form on the sign in page.
-            // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-            // e.g. domain, username, password, 2FA token, etc.
-            // You can pass any HTML attribute to the <input> tag through the object.
             credentials: {
-                username: { label: "Username", type: "text", placeholder: "jsmith" },
-                password: { label: "Password", type: "password" }
+                email: {},
+                password: {}
             },
             async authorize(credentials, req) {
-                const user = { id: "1", name: "J Smith", email: "jsmith@example.com", password: "1234" }
+                const user = await prisma.user.findUnique({
+                    where: {
+                        email: credentials?.email
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        // image?: true,
+                        password: true
+                    }
+                })
 
                 if (user) {
 
-                    // Any object returned will be saved in `user` property of the JWT
-                    return user
+                    return { ...user, id: user.id.toString() }
                 } else {
-                    // If you return null then an error will be displayed advising the user to check their details.
                     return null
-
-                    // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
                 }
             }
         })

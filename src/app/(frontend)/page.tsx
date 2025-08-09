@@ -4,7 +4,8 @@ import Login from "../(authPages)/logIn/page"
 const Home = () => {
   return (
     <div>
-      <Login />
+      test
+      {/* <Login /> */}
       {/* <ThemeToogleBtn /> */}
     </div>
   )
