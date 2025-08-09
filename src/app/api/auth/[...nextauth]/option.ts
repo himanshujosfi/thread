@@ -20,7 +20,7 @@ export type customeUser = {
 
 export const authOptions: AuthOptions = {
     pages: {
-        signIn: "/auth/logIn"
+        signIn: "/logIn"
     },
     callbacks: {
         async jwt({ token, user }) {
