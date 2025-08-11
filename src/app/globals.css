@@ -116,7 +116,19 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+
+
+/* commincd */
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  /* background: #000; */
+  /* full screen height */
 }

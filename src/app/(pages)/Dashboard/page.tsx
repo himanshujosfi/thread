@@ -1,8 +1,11 @@
-import React from 'react'
+import LeftBar from '@/components/leftbar/leftbar'
+
 
 const Dashboard = () => {
     return (
-        <div>Dashboard</div>
+        <div>
+            {/* <LeftBar /> */}
+        </div>
     )
 }
 

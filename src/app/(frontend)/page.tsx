@@ -2,17 +2,19 @@
 import ThemeToogleBtn from "@/components/common/ThemeToggleBtn"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../api/auth/[...nextauth]/option"
-import { LogOut } from "lucide-react"
+import LeftBar from "@/components/leftbar/leftbar"
+import CenterList from "@/components/centerList/centerList"
+import RightBar from "@/components/rightSide/rightBar"
+
+
 const Home = async () => {
   const session = await getServerSession(authOptions)
 
   return (
-    <div>
-      test
-      {session && JSON.stringify(session)}
-      {/* <button onClick={() => LogOut}>logOut</button> */}
-      {/* <Login /> */}
-      <ThemeToogleBtn />
+    <div className="container">
+      <LeftBar />
+      <CenterList />
+      <RightBar />
     </div>
   )
 }
