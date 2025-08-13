@@ -7,15 +7,17 @@ import { Label } from "@/components/ui/label"
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from "next-auth/react"
 
-const Login = async () => {
+export default function Login() {
     const router = useRouter()
-    const session = useSession()
+    const { data: session } = useSession()
+
     useEffect(() => {
         if (session) {
             router.push("/")
         }
-    })
-    const [loader, setLoader] = useState<boolean>(false)
+    }, [session, router])
+
+    const [loader, setLoader] = useState(false)
     const [authRegister, setAuthRegister] = useState<authType>({
         email: "",
         password: "",
@@ -27,7 +29,7 @@ const Login = async () => {
         if (!email || !password) {
             return alert("please fill all fields")
         }
-        const payload = { email, password };
+
         setLoader(true)
         try {
             const res = await fetch("/api/auth/login", {
@@ -35,43 +37,36 @@ const Login = async () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(payload),
-            });
+                body: JSON.stringify({ email, password }),
+            })
 
-            const data = await res.json();
             if (res.ok) {
-                setLoader(false)
-                signIn("credentials", {
-                    email: authRegister.email,
-                    password: authRegister.password,
+                await signIn("credentials", {
+                    email,
+                    password,
                     redirect: true,
                     callbackUrl: "/"
                 })
-                // router.push("/Dashboard")
             }
         } catch (error) {
+            console.error(error)
+        } finally {
             setLoader(false)
-            console.error(error);
         }
-        setLoader(false)
-
     }
 
-
     return (
-
-        < div className=" items-center justify-center h-screen w-screen flex" >
-
+        <div className="items-center justify-center h-screen w-screen flex">
             <div className='w-full max-w-md p-6 bg-muted rounded-lg shadow-md'>
-                <div className='flex  justify-center'>
+                <div className='flex justify-center'>
                     <img src="/vercel.svg" alt="img" width={50} height={20} />
                 </div>
 
                 <h1 className='text-sm font-bold py-2 mt-3'>Login</h1>
-                <span>Welcome back !</span>
+                <span>Welcome back!</span>
 
-                <form action="" onSubmit={handleSubmit} className='gap-4 flex flex-col mt-4'>
-                    <Label htmlFor="email" >Email</Label>
+                <form onSubmit={handleSubmit} className='gap-4 flex flex-col mt-4'>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                         name='email'
                         placeholder='Email'
@@ -79,8 +74,7 @@ const Login = async () => {
                         value={authRegister.email}
                         onChange={(e) => setAuthRegister({ ...authRegister, email: e.target.value })}
                     />
-                    <Label htmlFor="password" >Password</Label>
-
+                    <Label htmlFor="password">Password</Label>
                     <Input
                         name='password'
                         placeholder='Password'
@@ -88,22 +82,16 @@ const Login = async () => {
                         value={authRegister.password}
                         onChange={(e) => setAuthRegister({ ...authRegister, password: e.target.value })}
                     />
-                    <Button disabled={loader == true} type='submit'>
+                    <Button disabled={loader} type='submit'>
                         {loader ? "Loading..." : "Login"}
                     </Button>
 
-                    <span className='text-center text-sm text-muted-foreground mt-4' >
-                        Don't have an account ?
-                        <a href="/register" className=' ' >Register</a>
+                    <span className='text-center text-sm text-muted-foreground mt-4'>
+                        Don't have an account?
+                        <a href="/register"> Register</a>
                     </span>
-
                 </form>
-
             </div>
-
-
-        </div >
+        </div>
     )
 }
-
-export default Login
