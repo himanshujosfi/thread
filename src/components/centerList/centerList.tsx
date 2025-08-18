@@ -4,12 +4,18 @@ import React, { useRef, useState } from 'react'
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from '../ui/button'
 import { ImagePreview } from '../common/imagePreview';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import Loader from '@/app/Loader/page';
+import { Loader2 } from 'lucide-react';
 
 interface UserData {
     name: string;
 }
 const CenterList = () => {
     const myRef = useRef<HTMLInputElement>(null)
+    const router = useRouter()
+    const [loading, setLoading] = useState(false);
     const [image, setImage] = useState<File | null>(null)
     const [imageUrl, setImageUrl] = useState<string | undefined>()
     const [data, setData] = useState<UserData>({
@@ -32,36 +38,67 @@ const CenterList = () => {
         setImage(null)
         setImageUrl(undefined);
     };
+
     const handlePost = async () => {
         if (!data.name.trim()) {
             console.warn("Post content is empty");
             return;
         }
 
-        const formData = new FormData();
-        formData.append("newPost", data.name);
+        setLoading(true);
 
-        // Append image if selected
-        if (image) {
-            formData.append("image", image); // send the file
-        }
+        try {
+            const formData = new FormData();
+            formData.append("newPost", data.name);
+            if (image) formData.append("image", image);
 
-        // Call API
-        const res = await fetch("/api/newPost", {
-            method: "POST",
-            body: formData,
-        });
+            const res = await fetch("/api/newPost", {
+                method: "POST",
+                body: formData,
+            });
 
-        const result = await res.json();
+            const result = await res.json();
 
-        if (res.ok) {
-            console.log("Post created:", result.data);
-            // If you want, you can also show the imageUrl from the response
-            console.log("Image URL:", result.data.image);
-        } else {
-            console.error("Error creating post:", result.message);
+            if (res.ok) {
+                toast.success("New post created successfully!");
+                router.push("/");
+            } else {
+                toast.error("Error creating post: " + result.message);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong!");
+        } finally {
+            setLoading(false); // always stop loader
         }
     };
+
+    // const handlePost = async () => {
+    //     setLoading(true)
+    //     if (!data.name.trim()) {
+    //         console.warn("Post content is empty");
+    //         return;
+    //     }
+    //     const formData = new FormData();
+    //     formData.append("newPost", data.name);
+    //     if (image) {
+    //         formData.append("image", image);
+    //     }
+    //     const res = await fetch("/api/newPost", {
+    //         method: "POST",
+    //         body: formData,
+    //     });
+    //     const result = await res.json();
+
+    //     if (res.ok) {
+    //         toast.success("New post created sucessfully !")
+    //         router.push("/")
+    //         setLoading(false)
+    //     } else {
+    //         toast.error("Error creating post:", result.message);
+    //         setLoading(false)
+    //     }
+    // };
 
 
     const users = [
@@ -73,7 +110,12 @@ const CenterList = () => {
         { id: 6, name: "Simran Kaur", email: "simran.kaur@example.com", image: "/file.svg" },
     ];
 
+    // return (loading === true ? <Loader /> : "")
+    // console.log("laoder", loading)
+
+
     return (
+
         <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6 flex flex-col h-screen">
             {/* Top Logo */}
             <div className="flex items-center justify-center mb-8">
