@@ -32,8 +32,37 @@ const CenterList = () => {
         setImage(null)
         setImageUrl(undefined);
     };
+    const handlePost = async () => {
+        if (!data.name.trim()) {
+            console.warn("Post content is empty");
+            return;
+        }
 
-    const handlePost = () => { "" }
+        const formData = new FormData();
+        formData.append("newPost", data.name);
+
+        // Append image if selected
+        if (image) {
+            formData.append("image", image); // send the file
+        }
+
+        // Call API
+        const res = await fetch("/api/newPost", {
+            method: "POST",
+            body: formData,
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+            console.log("Post created:", result.data);
+            // If you want, you can also show the imageUrl from the response
+            console.log("Image URL:", result.data.image);
+        } else {
+            console.error("Error creating post:", result.message);
+        }
+    };
+
 
     const users = [
         { id: 1, name: "Aarav Sharma", email: "aarav.sharma@example.com", image: "/file.svg" },
@@ -79,7 +108,7 @@ const CenterList = () => {
                     className="rounded-md shrink-0"
                     onClick={handleRef}
                 />
-                <Button className="ml-auto" onClick={handlePost} disabled={data.name.length <= 5}>Post</Button>
+                <Button className="ml-auto" onClick={handlePost}>Post</Button>
             </div>
 
             {/* User List - Scrollable */}
