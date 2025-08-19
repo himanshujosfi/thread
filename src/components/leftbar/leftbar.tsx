@@ -12,7 +12,7 @@ import { CgDetailsMore } from "react-icons/cg";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SignOut from '../common/signOut/signOut';
-import { Avatar } from '../common/avatar/avatar';
+import { Avatars } from '../common/avatar/avatar';
 
 const LeftBar = () => {
     const pathname = usePathname()
@@ -38,7 +38,7 @@ const LeftBar = () => {
                 </ul>
 
                 <ul className="flex flex-col gap-6 text-white text-2xl">
-                    <li><Link href=""><Avatar /></Link></li>
+                    <li><Link href=""><Avatars /></Link></li>
                     <li><Link href=""><CgDetailsMore /></Link></li>
                     <li ><SignOut /></li>
                 </ul>
