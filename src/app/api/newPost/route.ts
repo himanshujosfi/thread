@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
             const arrayBuffer = await imageFile.arrayBuffer();
             fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
 
-            imageUrl = `/uploads/${fileName}`;
+            imageUrl = `${fileName}`;
         }
         console.log("url", imageUrl)
 
@@ -56,5 +56,34 @@ export async function POST(req: NextRequest) {
         }
         console.error("Unexpected API error:", error);
         return NextResponse.json({ message: "Unexpected error" }, { status: 500 });
+    }
+}
+
+
+// get data from the post
+
+export async function GET() {
+    try {
+        const session: customeSession | null = await getServerSession(authOptions);
+        if (!session) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        const posts = await prisma.newPost.findMany({
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        return NextResponse.json(posts);
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
     }
 }

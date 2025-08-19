@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from '../ui/button'
 import { ImagePreview } from '../common/imagePreview';
@@ -10,15 +10,28 @@ import Loader from '@/app/Loader/page';
 import { Avatars } from '../common/avatar/avatar';
 import { Heart, MoreHorizontal, Share } from 'lucide-react';
 import { CgComment } from 'react-icons/cg';
+import formatRelativeDate from '../common/dateconverter/page';
 
 interface UserData {
     name: string;
+}
+interface Post {
+    id: string;
+    newPost: string;
+    image?: string;
+    createdAt: string;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+    };
 }
 
 const CenterList = () => {
     const myRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
     const [loading, setLoading] = useState(false);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [image, setImage] = useState<File | null>(null)
     const [imageUrl, setImageUrl] = useState<string | undefined>()
     const [errors, setErrors] = useState(false)
@@ -26,7 +39,25 @@ const CenterList = () => {
         name: "",
     });
 
+    // fetch the post data
+    useEffect(() => {
+        setLoading(true)
+        const fetchPosts = async () => {
+            try {
+                const res = await fetch("/api/newPost");
+                if (!res.ok) throw new Error("Failed to fetch posts");
 
+                const data = await res.json();
+                setPosts(data);
+            } catch (err) {
+                toast.error("Fail to fetch the post ?")
+            } finally {
+                setLoading(false)
+                toast.success("All post fetch sucessfully !")
+            }
+        };
+        fetchPosts();
+    }, []);
 
     const handleRef = () => {
         myRef.current?.click()
@@ -83,15 +114,6 @@ const CenterList = () => {
         }
     };
 
-    const users = [
-        { id: 1, name: "Aarav Sharma", email: "aarav.sharma@example.com", image: "/file.svg" },
-        { id: 2, name: "Priya Mehta", email: "priya.mehta@example.com", image: "/file.svg" },
-        { id: 3, name: "Rohan Kapoor", email: "rohan.kapoor@example.com", image: "/file.svg" },
-        { id: 4, name: "Neha Singh", email: "neha.singh@example.com", image: "/file.svg" },
-        { id: 5, name: "Ishaan Verma", email: "ishaan.verma@example.com", image: "/file.svg" },
-        { id: 6, name: "Simran Kaur", email: "simran.kaur@example.com", image: "/file.svg" },
-    ];
-
     return (
         <div className="relative w-full max-w-4xl bg-white shadow-lg rounded-lg p-6 flex flex-col h-screen">
             {/* Top Logo */}
@@ -142,7 +164,7 @@ const CenterList = () => {
 
             {/* Feed Container */}
             <div className="flex-1 overflow-y-auto space-y-4">
-                {users.map((user) => (
+                {posts.map((user) => (
                     <div key={user.id} className="flex flex-row items-start gap-4 p-2">
                         {/* Avatar */}
                         <Avatars />
@@ -150,9 +172,9 @@ const CenterList = () => {
                         <div className="flex flex-col flex-1 rounded-lg shadow-sm bg-white border px-2">
                             {/* Top row */}
                             <div className="flex justify-between items-center">
-                                <strong className="text-lg font-semibold">{user.name}</strong>
+                                <strong className="text-lg font-semibold">{user.user.name}</strong>
                                 <div className="flex gap-2 items-center text-gray-600 text-sm">
-                                    <p>3 days ago</p>
+                                    <p>{formatRelativeDate(user.createdAt)}</p>
                                     <MoreHorizontal />
                                 </div>
                             </div>
@@ -160,7 +182,7 @@ const CenterList = () => {
                             {/* Post content */}
                             <div className="flex flex-col mt-1 mb-1">
                                 <p className="text-gray-700 font-semibold text-sm">
-                                    Sample post content for {user.name}
+                                    Sample post content for {user.newPost}
                                 </p>
                                 <img
                                     src={user.image}
