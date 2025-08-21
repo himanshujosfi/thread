@@ -4,6 +4,8 @@ import NextAuth, { ISODateString } from "next-auth"
 import { AuthOptions } from "next-auth"
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+
 
 export type customeSession = {
     user: customeUser,
@@ -21,7 +23,14 @@ export const authOptions: AuthOptions = {
         signIn: "/logIn",
         error: "/error",
     },
+    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
+        async signIn({ account, profile }: any) {
+            if (account.provider === "google") {
+                return profile.email_verified && profile.email.endsWith("@gmail.com")
+            }
+            return true
+        },
         async jwt({ token, user }) {
             // Persist the OAuth access_token and or the user id to the token right after signin
             if (user) {
@@ -62,7 +71,20 @@ export const authOptions: AuthOptions = {
                     return null
                 }
             }
+        }),
+
+        GoogleProvider({
+            clientId: process.env.GOOGLE_ID!,
+            clientSecret: process.env.GOOGLE_SECRET!,
+            authorization: {
+                params: {
+                    prompt: "consent",
+                    access_type: "offline",
+                    response_type: "code",
+                }
+            }
         })
+
     ]
 }
 

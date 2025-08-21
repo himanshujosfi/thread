@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from "next-auth/react"
+import LoginOptions from '../loginOptions/page'
+
+
 
 export default function Login() {
     const router = useRouter()
@@ -85,6 +88,13 @@ export default function Login() {
                     <Button disabled={loader} type='submit'>
                         {loader ? "Loading..." : "Login"}
                     </Button>
+
+                    <div>
+                        <LoginOptions
+                            onGoogleClick={() => signIn("google")}
+                            onGithubClick={() => signIn("github")}
+                        />
+                    </div>
 
                     <span className='text-center text-sm text-muted-foreground mt-4'>
                         Don't have an account?
