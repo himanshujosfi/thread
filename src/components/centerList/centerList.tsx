@@ -11,6 +11,12 @@ import { Avatars } from '../common/avatar/avatar';
 import { Heart, MoreHorizontal, Share } from 'lucide-react';
 import { CgComment } from 'react-icons/cg';
 import formatRelativeDate from '../common/dateconverter/page';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface UserData {
     name: string;
@@ -39,23 +45,22 @@ const CenterList = () => {
         name: "",
     });
 
-    // fetch the post data
-    useEffect(() => {
+    const fetchPosts = async () => {
         setLoading(true)
-        const fetchPosts = async () => {
-            try {
-                const res = await fetch("/api/newPost");
-                if (!res.ok) throw new Error("Failed to fetch posts");
+        try {
+            const res = await fetch("/api/newPost");
+            if (!res.ok) throw new Error("Failed to fetch posts");
 
-                const data = await res.json();
-                setPosts(data);
-            } catch (err) {
-                toast.error("Fail to fetch the post ?")
-            } finally {
-                setLoading(false)
-                toast.success("All post fetch sucessfully !")
-            }
-        };
+            const data = await res.json();
+            setPosts(data);
+        } catch (err) {
+            toast.error("Fail to fetch the post ?")
+        } finally {
+            setLoading(false)
+            toast.success("All post fetch sucessfully !")
+        }
+    };
+    useEffect(() => {
         fetchPosts();
     }, []);
 
@@ -103,6 +108,7 @@ const CenterList = () => {
                 setData({ name: "" });
                 setImage(null);
                 setImageUrl(undefined);
+                fetchPosts()
             } else {
                 toast.error("Error creating post: " + result.message);
             }
@@ -111,6 +117,36 @@ const CenterList = () => {
             toast.error("Something went wrong!");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleEdit = () => { }
+
+
+    const handleDelete = async (id: string) => {
+        console.log("id", id);
+        setLoading(true)
+        try {
+            const res = await fetch(`/api/newPostDelete/${id}`, {
+                method: "DELETE",
+            });
+
+            if (res.ok) {
+                toast.success("Deleted post");
+                router.push("/")
+                fetchPosts()
+                // refresh posts list here
+            } else {
+                const error = await res.json();
+                setLoading(false)
+                toast.error(error.message || "Failed to delete post");
+            }
+        } catch (error) {
+            setLoading(false)
+            console.error("error", error);
+            toast.error("Something went wrong");
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -175,14 +211,26 @@ const CenterList = () => {
                                 <strong className="text-lg font-semibold">{user.user.name}</strong>
                                 <div className="flex gap-2 items-center text-gray-600 text-sm">
                                     <p>{formatRelativeDate(user.createdAt)}</p>
-                                    <MoreHorizontal />
-                                </div>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <button className="p-1 rounded-full hover:bg-gray-100">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </button>
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => handleEdit}>Edit</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={(val) => handleDelete(user.id)} className="text-red-600">
+                                                Delete
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>                                </div>
                             </div>
 
                             {/* Post content */}
                             <div className="flex flex-col mt-1 mb-1">
                                 <p className="text-gray-700 font-semibold text-sm">
-                                    Sample post content for {user.newPost}
+                                    {user.newPost}
                                 </p>
                                 <img
                                     src={user.image}

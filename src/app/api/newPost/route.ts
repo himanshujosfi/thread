@@ -87,3 +87,42 @@ export async function GET() {
         return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
     }
 }
+
+
+// delete the post
+
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+    try {
+        const session: customeSession | null = await getServerSession(authOptions);
+
+        if (!session) {
+            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        }
+
+        const postId = params.id;
+
+        // Check if post exists
+        const existingPost = await prisma.newPost.findUnique({
+            where: { id: postId },
+        });
+
+        if (!existingPost) {
+            return NextResponse.json({ message: "Post not found" }, { status: 404 });
+        }
+
+        // (Optional) Ensure only the owner can delete their post
+        if (existingPost.userId !== session.user.id) {
+            return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+        }
+
+        // Delete the post
+        await prisma.newPost.delete({
+            where: { id: postId },
+        });
+
+        return NextResponse.json({ message: "Post deleted successfully" }, { status: 200 });
+    } catch (error) {
+        console.error("Error deleting post:", error);
+        return NextResponse.json({ error: "Failed to delete post" }, { status: 500 });
+    }
+}
