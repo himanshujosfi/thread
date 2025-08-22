@@ -120,14 +120,38 @@ const CenterList = () => {
         }
     };
 
-    const handleEdit = () => { }
+    const handleEdit = async (id: string,) => {
+        console.log("id", id);
+        setLoading(true)
+        try {
+            const res = await fetch(`/api/newPost/${id}`, {
+                method: "Put",
+            });
+
+            if (res.ok) {
+                toast.success("Edit post");
+                router.push("/")
+                fetchPosts()
+            } else {
+                const error = await res.json();
+                setLoading(false)
+                toast.error(error.message || "Failed to edit post");
+            }
+        } catch (error) {
+            setLoading(false)
+            console.error("error", error);
+            toast.error("Something went wrong");
+        } finally {
+            setLoading(false)
+        }
+    }
 
 
     const handleDelete = async (id: string) => {
         console.log("id", id);
         setLoading(true)
         try {
-            const res = await fetch(`/api/newPostDelete/${id}`, {
+            const res = await fetch(`/api/newPost/${id}`, {
                 method: "DELETE",
             });
 
@@ -219,8 +243,8 @@ const CenterList = () => {
                                         </DropdownMenuTrigger>
 
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => handleEdit}>Edit</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={(val) => handleDelete(user.id)} className="text-red-600">
+                                            <DropdownMenuItem onClick={() => handleEdit(user?.id)}>Edit</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleDelete(user?.id)} className="text-red-600">
                                                 Delete
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
@@ -232,11 +256,15 @@ const CenterList = () => {
                                 <p className="text-gray-700 font-semibold text-sm">
                                     {user.newPost}
                                 </p>
-                                <img
-                                    src={user.image}
-                                    alt="img"
-                                    className="mt-2 w-full h-64 object-cover rounded-md border"
-                                />
+                                {
+                                    user?.image && (
+                                        <img
+                                            src={user.image}
+                                            alt="img"
+                                            className="mt-2 w-full h-64 object-cover rounded-md border"
+                                        />
+                                    )
+                                }
                             </div>
 
                             {/* Actions */}
